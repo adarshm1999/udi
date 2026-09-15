@@ -30,7 +30,13 @@ function readData() {
   const file = fs.readFileSync(filePath, 'utf8');
 
   try {
-    return JSON.parse(file);
+    const data = JSON.parse(file);
+
+    if (!data || !Array.isArray(data.answers)) {
+      return { answers: [] };
+    }
+
+    return data;
   } catch (error) {
     return {
       answers: [],
@@ -77,13 +83,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const {
-      id,
-      question,
-      answer,
-    } = body;
+    const { id, question, answer } = body;
 
-    if (!id || !question || !answer) {
+    if (!id || !question || typeof answer !== 'string' || !answer.trim()) {
       return NextResponse.json(
         {
           success: false,
